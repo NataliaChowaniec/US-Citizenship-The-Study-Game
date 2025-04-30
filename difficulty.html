@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="difficulty-container">
+    <h1>Choose Your Difficulty</h1>
+    <p>Select a difficulty level to start the citizenship quiz</p>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="quiz-flash-container">
+        {% for category, message in messages %}
+        <div class="quiz-flash-message {{ category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    
+    <div class="difficulty-options">
+        <div class="difficulty-card">
+            <h2>Easy</h2>
+            <p>Basic citizenship questions</p>
+            <p>60 seconds per question</p>
+            <p>10 points per correct answer</p>
+            <a href="{{ url_for('quiz', difficulty='easy') }}" class="btn easy">Start Easy Quiz</a>
+        </div>
+        <div class="difficulty-card">
+            <h2>Medium</h2>
+            <p>Moderate citizenship questions</p>
+            <p>30 seconds per question</p>
+            <p>25 points per correct answer</p>
+            <a href="{{ url_for('quiz', difficulty='medium') }}" class="btn medium">Start Medium Quiz</a>
+        </div>
+        <div class="difficulty-card">
+            <h2>Hard</h2>
+            <p>Advanced citizenship questions</p>
+            <p>15 seconds per question</p>
+            <p>50 points per correct answer</p>
+            <a href="{{ url_for('quiz', difficulty='hard') }}" class="btn hard">Start Hard Quiz</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

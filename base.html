@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>U.S. Citizenship Quiz</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">U.S. Citizenship Quiz</div>
+            {% if current_user.is_authenticated and request.endpoint != 'difficulty' %}
+            <div class="user-nav">
+                <a href="{{ url_for('difficulty') }}">Home</a>
+                <a href="{{ url_for('progress') }}">View Progress</a>
+                {% if current_user.is_admin %}
+                <a href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
+                {% endif %}
+                <span>Welcome, {{ current_user.username }}</span>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+            {% elif current_user.is_authenticated %}
+            <div class="user-nav">
+                <a href="{{ url_for('progress') }}">View Progress</a>
+                {% if current_user.is_admin %}
+                <a href="{{ url_for('admin.dashboard') }}">Admin Dashboard</a>
+                {% endif %}
+                <span>Welcome, {{ current_user.username }}</span>
+                <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; {{ now.year }} US Citizenship Quiz</p>
+    </footer>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

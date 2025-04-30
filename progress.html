@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="progress-container">
+    <div class="progress-header">
+        <h1>Your Progress Summary</h1>
+    
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="quiz-flash-container">
+            {% for category, message in messages %}
+            <div class="quiz-flash-message {{ category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+    </div>
+    
+    <div class="stats-overview">
+        <div class="stat-card">
+            <div class="stat-label">Total Games</div>
+            <div class="stat-value">{{ stats.total_games }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Highest Score</div>
+            <div class="stat-value">{{ stats.highest_score }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Lowest Score</div>
+            <div class="stat-value">
+                {% if stats.lowest_score > 1000000 %}
+                    0
+                {% else %}
+                    {{ stats.lowest_score }}
+                {% endif %}
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Correct</div>
+            <div class="stat-value">{{ stats.total_correct }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Incorrect</div>
+            <div class="stat-value">{{ stats.total_incorrect }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Average Time</div>
+            <div class="stat-value">{{ (stats.avg_time|float)|round(1) }}s</div>
+        </div>
+    </div>
+    
+    <div class="recent-games">
+        <h2>Recent Games</h2>
+        
+        {% if game_sessions %}
+        <div class="session-list">
+            {% for session in game_sessions %}
+            <div class="session-card">
+                <div class="session-header">
+                    <span class="difficulty {{ session.difficulty }}">{{ session.difficulty.capitalize() }}</span>
+                    <span class="date">{{ session.completed_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </div>
+                <div class="session-stats">
+                    <p>
+                        <span class="label">Score:</span>
+                        <span class="value">{{ session.score }}</span>
+                    </p>
+                    <p>
+                        <span class="label">Correct:</span>
+                        <span class="value">{{ session.correct_answers }}</span>
+                    </p>
+                    <p>
+                        <span class="label">Incorrect:</span>
+                        <span class="value">{{ session.incorrect_answers }}</span>
+                    </p>
+                    <p>
+                        <span class="label">Time:</span>
+                        <span class="value">{{ session.time_taken_formatted }}</span>
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center">You haven't taken any quizzes yet.</p>
+        {% endif %}
+        
+        <div class="text-center">
+            <a href="{{ url_for('difficulty') }}" class="btn primary">Take a New Quiz</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

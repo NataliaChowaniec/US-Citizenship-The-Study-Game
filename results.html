@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="results-container">
+    <h1 class="results-title">Quiz Results</h1>
+    
+    <div class="results-card">
+        <div class="score">{{ score }} Points Earned</div>
+        
+        <div class="results-details">
+            <div class="detail-item">
+                <div class="detail-label">Correct Answers</div>
+                <div class="detail-value">{{ correct_answers }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Incorrect Answers</div>
+                <div class="detail-value">{{ incorrect_answers }}</div>
+            </div>
+
+        </div>
+        
+        <div class="time-taken-container">
+            <div class="detail-item">
+                <div class="detail-label">Time Taken</div>
+                <div class="detail-value">{{ (time_taken / 60)|int }}m {{ time_taken % 60 }}s</div>
+            </div>
+        </div>
+        
+        <div class="user-total-points">
+            <p>Your total points: <span class="highlight">{{ current_user.points }}</span></p>
+        </div>
+        
+        <p>Would you like to try another quiz?</p>
+        
+        <div class="results-buttons">
+            <a href="{{ url_for('difficulty') }}" class="btn take-quiz">Take Another Quiz</a>
+            <a href="{{ url_for('progress') }}" class="btn view-progress">View My Progress</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

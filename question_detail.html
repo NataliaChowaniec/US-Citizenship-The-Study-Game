@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Question Details</h1>
+        <a href="{{ url_for('admin.questions') }}" class="admin-tab" style="margin-left: auto; text-decoration: none;">← Back to Questions</a>
+    </div>
+    
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-tab">Dashboard</a>
+        <a href="{{ url_for('admin.questions') }}" class="admin-tab active">Questions</a>
+        <a href="{{ url_for('admin.users') }}" class="admin-tab">Users</a>
+    </div>
+    
+    <div class="admin-card">
+        <div class="question-header">
+            <h2>Question #{{ question.id }} <span class="difficulty-badge badge-{{ question.difficulty }}">{{ question.difficulty|capitalize }}</span></h2>
+        </div>
+        
+        <div class="question-content">
+            <div class="content-section">
+                <h3>Question Text:</h3>
+                <p class="question-text">{{ question.text }}</p>
+            </div>
+            
+            <div class="content-section">
+                <h3>Options:</h3>
+                <ul class="options-list">
+                    {% for option in question.options %}
+                        <li class="{% if option == question.correct_answer %}correct-option{% endif %}">
+                            {{ option }} {% if option == question.correct_answer %}<span class="correct-badge">Correct Answer</span>{% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            {% if question.state_specific %}
+                <div class="state-specific-info">
+                    <i class="fas fa-map-marker-alt"></i> This is a state-specific question for <strong>{{ question.state }}</strong>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="admin-controls">
+            <div class="difficulty-section">
+                <h3>Difficulty Level</h3>
+                <div class="difficulty-buttons">
+                    <button class="btn {% if question.difficulty == 'easy' %}active{% endif %}" 
+                            style="background-color: var(--easy-color);" 
+                            onclick="updateQuestionDifficulty({{ question.id }}, 'easy')">Easy</button>
+                    <button class="btn {% if question.difficulty == 'medium' %}active{% endif %}" 
+                            style="background-color: var(--medium-color);" 
+                            onclick="updateQuestionDifficulty({{ question.id }}, 'medium')">Medium</button>
+                    <button class="btn {% if question.difficulty == 'hard' %}active{% endif %}" 
+                            style="background-color: var(--hard-color);" 
+                            onclick="updateQuestionDifficulty({{ question.id }}, 'hard')">Hard</button>
+                </div>
+            </div>
+            
+            <div class="state-specific-section">
+                <h3>State Specific Settings</h3>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="stateSpecificSwitch" {% if question.state_specific %}checked{% endif %} onchange="toggleStateSpecific()">
+                    <label class="form-check-label" for="stateSpecificSwitch">This question is specific to a state</label>
+                </div>
+                
+                <div id="stateSelectContainer" {% if not question.state_specific %}style="display: none;"{% endif %}>
+                    <select class="form-select mt-2" id="stateSelect" onchange="updateQuestionState()">
+                        <option value="">Select State</option>
+                        <option value="AL" {% if question.state == 'AL' %}selected{% endif %}>Alabama</option>
+                        <option value="AK" {% if question.state == 'AK' %}selected{% endif %}>Alaska</option>
+                        <option value="AZ" {% if question.state == 'AZ' %}selected{% endif %}>Arizona</option>
+                        <option value="AR" {% if question.state == 'AR' %}selected{% endif %}>Arkansas</option>
+                        <option value="CA" {% if question.state == 'CA' %}selected{% endif %}>California</option>
+                        <option value="CO" {% if question.state == 'CO' %}selected{% endif %}>Colorado</option>
+                        <option value="CT" {% if question.state == 'CT' %}selected{% endif %}>Connecticut</option>
+                        <option value="DE" {% if question.state == 'DE' %}selected{% endif %}>Delaware</option>
+                        <option value="FL" {% if question.state == 'FL' %}selected{% endif %}>Florida</option>
+                        <option value="GA" {% if question.state == 'GA' %}selected{% endif %}>Georgia</option>
+                        <option value="HI" {% if question.state == 'HI' %}selected{% endif %}>Hawaii</option>
+                        <option value="ID" {% if question.state == 'ID' %}selected{% endif %}>Idaho</option>
+                        <option value="IL" {% if question.state == 'IL' %}selected{% endif %}>Illinois</option>
+                        <option value="IN" {% if question.state == 'IN' %}selected{% endif %}>Indiana</option>
+                        <option value="IA" {% if question.state == 'IA' %}selected{% endif %}>Iowa</option>
+                        <option value="KS" {% if question.state == 'KS' %}selected{% endif %}>Kansas</option>
+                        <option value="KY" {% if question.state == 'KY' %}selected{% endif %}>Kentucky</option>
+                        <option value="LA" {% if question.state == 'LA' %}selected{% endif %}>Louisiana</option>
+                        <option value="ME" {% if question.state == 'ME' %}selected{% endif %}>Maine</option>
+                        <option value="MD" {% if question.state == 'MD' %}selected{% endif %}>Maryland</option>
+                        <option value="MA" {% if question.state == 'MA' %}selected{% endif %}>Massachusetts</option>
+                        <option value="MI" {% if question.state == 'MI' %}selected{% endif %}>Michigan</option>
+                        <option value="MN" {% if question.state == 'MN' %}selected{% endif %}>Minnesota</option>
+                        <option value="MS" {% if question.state == 'MS' %}selected{% endif %}>Mississippi</option>
+                        <option value="MO" {% if question.state == 'MO' %}selected{% endif %}>Missouri</option>
+                        <option value="MT" {% if question.state == 'MT' %}selected{% endif %}>Montana</option>
+                        <option value="NE" {% if question.state == 'NE' %}selected{% endif %}>Nebraska</option>
+                        <option value="NV" {% if question.state == 'NV' %}selected{% endif %}>Nevada</option>
+                        <option value="NH" {% if question.state == 'NH' %}selected{% endif %}>New Hampshire</option>
+                        <option value="NJ" {% if question.state == 'NJ' %}selected{% endif %}>New Jersey</option>
+                        <option value="NM" {% if question.state == 'NM' %}selected{% endif %}>New Mexico</option>
+                        <option value="NY" {% if question.state == 'NY' %}selected{% endif %}>New York</option>
+                        <option value="NC" {% if question.state == 'NC' %}selected{% endif %}>North Carolina</option>
+                        <option value="ND" {% if question.state == 'ND' %}selected{% endif %}>North Dakota</option>
+                        <option value="OH" {% if question.state == 'OH' %}selected{% endif %}>Ohio</option>
+                        <option value="OK" {% if question.state == 'OK' %}selected{% endif %}>Oklahoma</option>
+                        <option value="OR" {% if question.state == 'OR' %}selected{% endif %}>Oregon</option>
+                        <option value="PA" {% if question.state == 'PA' %}selected{% endif %}>Pennsylvania</option>
+                        <option value="RI" {% if question.state == 'RI' %}selected{% endif %}>Rhode Island</option>
+                        <option value="SC" {% if question.state == 'SC' %}selected{% endif %}>South Carolina</option>
+                        <option value="SD" {% if question.state == 'SD' %}selected{% endif %}>South Dakota</option>
+                        <option value="TN" {% if question.state == 'TN' %}selected{% endif %}>Tennessee</option>
+                        <option value="TX" {% if question.state == 'TX' %}selected{% endif %}>Texas</option>
+                        <option value="UT" {% if question.state == 'UT' %}selected{% endif %}>Utah</option>
+                        <option value="VT" {% if question.state == 'VT' %}selected{% endif %}>Vermont</option>
+                        <option value="VA" {% if question.state == 'VA' %}selected{% endif %}>Virginia</option>
+                        <option value="WA" {% if question.state == 'WA' %}selected{% endif %}>Washington</option>
+                        <option value="WV" {% if question.state == 'WV' %}selected{% endif %}>West Virginia</option>
+                        <option value="WI" {% if question.state == 'WI' %}selected{% endif %}>Wisconsin</option>
+                        <option value="WY" {% if question.state == 'WY' %}selected{% endif %}>Wyoming</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <h2>Performance Statistics</h2>
+        
+        <div class="stats-cards">
+            <div class="stat-card stat-card-total">
+                <div class="stat-value">{{ stats.total_answers }}</div>
+                <div class="stat-label">Total Answers</div>
+            </div>
+            
+            <div class="stat-card stat-card-correct">
+                <div class="stat-value">{{ stats.correct_percentage }}%</div>
+                <div class="stat-label">Correct Answers</div>
+            </div>
+            
+            <div class="stat-card stat-card-incorrect">
+                <div class="stat-value">{{ stats.incorrect_percentage }}%</div>
+                <div class="stat-label">Incorrect Answers</div>
+            </div>
+            
+            <div class="stat-card stat-card-expired">
+                <div class="stat-value">{{ stats.timer_expired_percentage }}%</div>
+                <div class="stat-label">Timer Expired</div>
+            </div>
+            
+            <div class="stat-card stat-card-time">
+                <div class="stat-value">{{ stats.avg_time }}s</div>
+                <div class="stat-label">Avg. Time</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent answers table -->
+    {% if question_answers %}
+    <div class="admin-card">
+        <h2>Recent Answers</h2>
+        <div class="admin-table-container">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Answer</th>
+                        <th>Status</th>
+                        <th>Time Taken</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for answer in question_answers %}
+                    <tr {% if answer.timer_expired %}class="table-secondary"{% elif answer.is_correct %}class="table-success"{% else %}class="table-danger"{% endif %}>
+                        <td>{{ users[answer.user_id].username }}</td>
+                        <td>{{ answer.answer or 'No answer (timeout)' }}</td>
+                        <td>
+                            {% if answer.is_correct %}
+                                <span class="badge bg-success">Correct</span>
+                            {% elif answer.timer_expired %}
+                                <span class="badge bg-secondary">Timeout</span>
+                            {% else %}
+                                <span class="badge bg-danger">Incorrect</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ answer.time_taken }}s</td>
+                        <td>{{ answer.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="admin-card">
+        <div class="no-answers">
+            <p>No answers for this question yet.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script>
+    // Set CSRF token and question ID for admin.js to use
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add CSRF token meta tag
+        const meta = document.createElement('meta');
+        meta.name = 'csrf-token';
+        meta.content = '{{ csrf_token() }}';
+        document.head.appendChild(meta);
+        
+        // Add question ID as a data attribute
+        document.querySelector('.question-header h2').setAttribute('data-question-id', '{{ question.id }}');
+    });
+</script>
+{% endblock %}

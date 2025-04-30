@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Question Management</h1>
+    </div>
+    
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-tab">Dashboard</a>
+        <a href="{{ url_for('admin.questions') }}" class="admin-tab active">Questions</a>
+        <a href="{{ url_for('admin.users') }}" class="admin-tab">Users</a>
+    </div>
+    
+    <div class="admin-card">
+        <h2>Questions</h2>
+        
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Question</th>
+                    <th>Difficulty</th>
+                    <th>State Specific</th>
+                    <th>State</th>
+                    <th>Performance</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in questions %}
+                <tr>
+                    <td>{{ question.id }}</td>
+                    <td class="admin-question-text" title="{{ question.text }}">{{ question.text }}</td>
+                    <td>
+                        <select class="difficulty-select" data-question-id="{{ question.id }}">
+                            <option value="easy" {% if question.difficulty == 'easy' %}selected{% endif %}>Easy</option>
+                            <option value="medium" {% if question.difficulty == 'medium' %}selected{% endif %}>Medium</option>
+                            <option value="hard" {% if question.difficulty == 'hard' %}selected{% endif %}>Hard</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div class="state-toggle-container">
+                            <label class="toggle-switch">
+                                <input type="checkbox" class="state-toggle" data-question-id="{{ question.id }}" 
+                                       {% if question.state_specific %}checked{% endif %}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </td>
+                    <td>
+                        <select class="state-select" data-question-id="{{ question.id }}" 
+                                {% if not question.state_specific %}disabled{% endif %}>
+                            <option value="">Select State</option>
+                            <option value="AL" {% if question.state == 'AL' %}selected{% endif %}>Alabama</option>
+                            <option value="AK" {% if question.state == 'AK' %}selected{% endif %}>Alaska</option>
+                            <option value="AZ" {% if question.state == 'AZ' %}selected{% endif %}>Arizona</option>
+                            <option value="AR" {% if question.state == 'AR' %}selected{% endif %}>Arkansas</option>
+                            <option value="CA" {% if question.state == 'CA' %}selected{% endif %}>California</option>
+                            <option value="CO" {% if question.state == 'CO' %}selected{% endif %}>Colorado</option>
+                            <option value="CT" {% if question.state == 'CT' %}selected{% endif %}>Connecticut</option>
+                            <option value="DE" {% if question.state == 'DE' %}selected{% endif %}>Delaware</option>
+                            <option value="FL" {% if question.state == 'FL' %}selected{% endif %}>Florida</option>
+                            <option value="GA" {% if question.state == 'GA' %}selected{% endif %}>Georgia</option>
+                            <option value="HI" {% if question.state == 'HI' %}selected{% endif %}>Hawaii</option>
+                            <option value="ID" {% if question.state == 'ID' %}selected{% endif %}>Idaho</option>
+                            <option value="IL" {% if question.state == 'IL' %}selected{% endif %}>Illinois</option>
+                            <option value="IN" {% if question.state == 'IN' %}selected{% endif %}>Indiana</option>
+                            <option value="IA" {% if question.state == 'IA' %}selected{% endif %}>Iowa</option>
+                            <option value="KS" {% if question.state == 'KS' %}selected{% endif %}>Kansas</option>
+                            <option value="KY" {% if question.state == 'KY' %}selected{% endif %}>Kentucky</option>
+                            <option value="LA" {% if question.state == 'LA' %}selected{% endif %}>Louisiana</option>
+                            <option value="ME" {% if question.state == 'ME' %}selected{% endif %}>Maine</option>
+                            <option value="MD" {% if question.state == 'MD' %}selected{% endif %}>Maryland</option>
+                            <option value="MA" {% if question.state == 'MA' %}selected{% endif %}>Massachusetts</option>
+                            <option value="MI" {% if question.state == 'MI' %}selected{% endif %}>Michigan</option>
+                            <option value="MN" {% if question.state == 'MN' %}selected{% endif %}>Minnesota</option>
+                            <option value="MS" {% if question.state == 'MS' %}selected{% endif %}>Mississippi</option>
+                            <option value="MO" {% if question.state == 'MO' %}selected{% endif %}>Missouri</option>
+                            <option value="MT" {% if question.state == 'MT' %}selected{% endif %}>Montana</option>
+                            <option value="NE" {% if question.state == 'NE' %}selected{% endif %}>Nebraska</option>
+                            <option value="NV" {% if question.state == 'NV' %}selected{% endif %}>Nevada</option>
+                            <option value="NH" {% if question.state == 'NH' %}selected{% endif %}>New Hampshire</option>
+                            <option value="NJ" {% if question.state == 'NJ' %}selected{% endif %}>New Jersey</option>
+                            <option value="NM" {% if question.state == 'NM' %}selected{% endif %}>New Mexico</option>
+                            <option value="NY" {% if question.state == 'NY' %}selected{% endif %}>New York</option>
+                            <option value="NC" {% if question.state == 'NC' %}selected{% endif %}>North Carolina</option>
+                            <option value="ND" {% if question.state == 'ND' %}selected{% endif %}>North Dakota</option>
+                            <option value="OH" {% if question.state == 'OH' %}selected{% endif %}>Ohio</option>
+                            <option value="OK" {% if question.state == 'OK' %}selected{% endif %}>Oklahoma</option>
+                            <option value="OR" {% if question.state == 'OR' %}selected{% endif %}>Oregon</option>
+                            <option value="PA" {% if question.state == 'PA' %}selected{% endif %}>Pennsylvania</option>
+                            <option value="RI" {% if question.state == 'RI' %}selected{% endif %}>Rhode Island</option>
+                            <option value="SC" {% if question.state == 'SC' %}selected{% endif %}>South Carolina</option>
+                            <option value="SD" {% if question.state == 'SD' %}selected{% endif %}>South Dakota</option>
+                            <option value="TN" {% if question.state == 'TN' %}selected{% endif %}>Tennessee</option>
+                            <option value="TX" {% if question.state == 'TX' %}selected{% endif %}>Texas</option>
+                            <option value="UT" {% if question.state == 'UT' %}selected{% endif %}>Utah</option>
+                            <option value="VT" {% if question.state == 'VT' %}selected{% endif %}>Vermont</option>
+                            <option value="VA" {% if question.state == 'VA' %}selected{% endif %}>Virginia</option>
+                            <option value="WA" {% if question.state == 'WA' %}selected{% endif %}>Washington</option>
+                            <option value="WV" {% if question.state == 'WV' %}selected{% endif %}>West Virginia</option>
+                            <option value="WI" {% if question.state == 'WI' %}selected{% endif %}>Wisconsin</option>
+                            <option value="WY" {% if question.state == 'WY' %}selected{% endif %}>Wyoming</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div class="performance-indicator">
+                            {{ "%.1f"|format(question.correct_percentage) }}% correct
+                            {% if question.timer_expired_count > 0 %}
+                            <div class="timer-expired-indicator">{{ question.timer_expired_count }} timer expired</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('admin.question_detail', question_id=question.id) }}" class="view-details-btn">
+                            <i class="fas fa-chart-bar"></i> View Analytics
+                        </a>
+                        <button class="view-details-btn" onclick="openQuestionModal('{{ question.id }}')">
+                            <i class="fas fa-eye"></i> Quick View
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Windows for Quick View -->
+{% for question in questions %}
+<div class="question-modal" id="questionModal{{ question.id }}">
+    <div class="question-modal-content">
+        <div class="question-modal-header">
+            <h5>Question Details</h5>
+            <span class="close-modal" onclick="closeQuestionModal('{{ question.id }}')">&times;</span>
+        </div>
+        <div class="question-modal-body">
+            <h4>{{ question.text }}</h4>
+            
+            <div class="question-options">
+                <h5>Options:</h5>
+                <ul>
+                    {% for option in question.options %}
+                    <li {% if option == question.correct_answer %}class="correct-answer"{% endif %}>
+                        {{ option }} {% if option == question.correct_answer %}(Correct){% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="question-stats">
+                <h5>Performance Statistics:</h5>
+                <table class="stats-table">
+                    <tbody>
+                        <tr>
+                            <td>Total Answers:</td>
+                            <td>{{ question.total_answers }}</td>
+                        </tr>
+                        <tr>
+                            <td>Correct Answers:</td>
+                            <td>{{ question.correct_answers }} ({{ "%.1f"|format(question.correct_percentage) }}%)</td>
+                        </tr>
+                        <tr>
+                            <td>Timer Expired Count:</td>
+                            <td>{{ question.timer_expired_count }} ({{ "%.1f"|format(question.timer_expired_percentage) }}%)</td>
+                        </tr>
+                        <tr>
+                            <td>Average Time to Answer:</td>
+                            <td>{{ "%.1f"|format(question.avg_time) }} seconds</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="question-modal-footer">
+            <button class="close-btn" onclick="closeQuestionModal('{{ question.id }}')">Close</button>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+function openQuestionModal(id) {
+    document.getElementById('questionModal' + id).style.display = 'block';
+}
+
+function closeQuestionModal(id) {
+    document.getElementById('questionModal' + id).style.display = 'none';
+}
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+    if (event.target.classList.contains('question-modal')) {
+        event.target.style.display = 'none';
+    }
+}
+</script>
+
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% endblock %}

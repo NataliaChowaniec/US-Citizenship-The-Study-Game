@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="quiz-container">
+    <h1>U.S. Citizenship Quiz</h1>
+    
+    <div class="quiz-header">
+        <div class="quiz-info-left">Question {{ question_number }} of {{ total_questions }}</div>
+        <div class="quiz-points">Points: {{ current_user.points }}</div>
+        <div class="quiz-timer">Time left: <span id="timer-text">{{ timer_duration }}</span>s</div>
+    </div>
+    
+    <div class="power-ups">
+        <button type="button" id="skip-btn" class="powerup-btn" data-points="50">Skip Question (50 points)</button>
+        <button id="add-time-btn" class="powerup-btn" data-points="20">+10 Seconds (20 points)</button>
+    </div>
+    
+    <div id="server-flashes" class="quiz-flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="quiz-flash-message {{ category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+    
+    <div class="question-card" id="question-content-container">
+        <div class="question-text">{{ question.text }}</div>
+        
+        <form id="answer-form" method="POST" action="{{ url_for('submit_answer') }}">
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="skipped" id="skipped-input" value="false">
+            <input type="hidden" name="timer_expired" id="timer-expired-input" value="false">
+            
+            <div class="options">
+                {% for option in question.options %}
+                <div class="option">
+                    <input type="radio" name="answer" id="option{{ loop.index }}" value="{{ option }}">
+                    <label for="option{{ loop.index }}">{{ option }}</label>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <button type="submit" id="submit-btn" class="btn primary">Submit Answer</button>
+        </form>
+    </div>
+</div>
+
+<!-- For JavaScript-generated flash messages -->
+<div id="flash-container" class="flash-container"></div>
+
+<script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+{% endblock %}

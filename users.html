@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>User Management</h1>
+    </div>
+    
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-tab">Dashboard</a>
+        <a href="{{ url_for('admin.questions') }}" class="admin-tab">Questions</a>
+        <a href="{{ url_for('admin.users') }}" class="admin-tab active">Users</a>
+    </div>
+    
+    <div class="admin-card">
+        <h2>Users</h2>
+        
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>State</th>
+                    <th>Points</th>
+                    <th>Joined</th>
+                    <th>Quiz Count</th>
+                    <th>Admin</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.state }}</td>
+                    <td>{{ user.points }}</td>
+                    <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ user.game_sessions|length }}</td>
+                    <td>
+                        <div class="state-toggle-container">
+                            <label class="toggle-switch">
+                                <input type="checkbox" class="admin-toggle" data-user-id="{{ user.id }}" 
+                                       {% if user.is_admin %}checked{% endif %}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="admin-controls">
+                            <button class="reset-password-btn" data-user-id="{{ user.id }}">
+                                Reset Password
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal-overlay" id="resetPasswordModal">
+    <div class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>Reset Password</h5>
+                <span class="close-modal" onclick="closeModal('resetPasswordModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to reset the password for this user?</p>
+                <p>A new random password will be generated and displayed.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" onclick="closeModal('resetPasswordModal')">Cancel</button>
+                <button type="button" class="btn btn-warning" id="confirmResetBtn">Reset Password</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="newPasswordModal">
+    <div class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>New Password</h5>
+                <span class="close-modal" onclick="closeModal('newPasswordModal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>The password has been reset. The new password is:</p>
+                <div class="new-password-display" id="newPasswordDisplay"></div>
+                <p>Make sure to copy this password and provide it to the user.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" onclick="closeModal('newPasswordModal')">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Admin toggle event handlers for users
+    document.querySelectorAll('.admin-toggle').forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const userId = this.getAttribute('data-user-id');
+            const isAdmin = this.checked;
+            
+            // Create form data
+            const formData = new FormData();
+            formData.append('user_id', userId);
+            
+            fetch('/admin/toggle_admin', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('Admin status updated successfully', 'success');
+                } else {
+                    showAlert(data.message || 'Failed to update admin status', 'error');
+                    // Revert toggle if failed
+                    this.checked = !isAdmin;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred', 'error');
+                // Revert toggle if error
+                this.checked = !isAdmin;
+            });
+        });
+    });
+    
+    // Reset password functionality
+    let currentUserId = null;
+    
+    document.querySelectorAll('.reset-password-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            currentUserId = this.getAttribute('data-user-id');
+            document.getElementById('resetPasswordModal').style.display = 'block';
+        });
+    });
+    
+    document.getElementById('confirmResetBtn').addEventListener('click', function() {
+        if (!currentUserId) return;
+        
+        // Create form data
+        const formData = new FormData();
+        formData.append('user_id', currentUserId);
+        
+        fetch('/admin/reset_user_password', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            closeModal('resetPasswordModal');
+            
+            if (data.success) {
+                document.getElementById('newPasswordDisplay').textContent = data.new_password;
+                document.getElementById('newPasswordModal').style.display = 'block';
+            } else {
+                showAlert(data.message || 'Failed to reset password', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            closeModal('resetPasswordModal');
+            showAlert('An error occurred', 'error');
+        });
+    });
+    
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `flash-message ${type}`;
+        alertDiv.textContent = message;
+        document.querySelector('.admin-container').prepend(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+});
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = 'none';
+}
+
+// Close modals when clicking outside
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal-overlay')) {
+        event.target.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

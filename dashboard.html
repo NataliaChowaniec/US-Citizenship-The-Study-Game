@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Admin Dashboard</h1>
+    </div>
+    
+    <div class="admin-tabs">
+        <a href="{{ url_for('admin.dashboard') }}" class="admin-tab active">Dashboard</a>
+        <a href="{{ url_for('admin.questions') }}" class="admin-tab">Questions</a>
+        <a href="{{ url_for('admin.users') }}" class="admin-tab">Users</a>
+    </div>
+    
+    <div class="admin-card">
+        <h2>Quiz Statistics</h2>
+        
+        <div class="admin-stats">
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total_users }}</div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total_questions }}</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.total_quizzes }}</div>
+                <div class="stat-label">Quizzes Completed</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-value">{{ stats.avg_score }}%</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="admin-card">
+        <h2>Question Performance</h2>
+        
+        <div class="admin-chart-container">
+            <canvas id="questionPerformanceChart"></canvas>
+        </div>
+        
+        <!-- Question Difficulty Tabs -->
+        <div class="question-tabs">
+            <button class="tablink active" onclick="openDifficultyTab(event, 'easy', 'easy')">Easy Questions</button>
+            <button class="tablink" onclick="openDifficultyTab(event, 'medium', 'medium')">Medium Questions</button>
+            <button class="tablink" onclick="openDifficultyTab(event, 'hard', 'hard')">Hard Questions</button>
+        </div>
+        
+        <!-- Easy Questions Tab -->
+        <div id="easy" class="tabcontent" style="display: block;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th>Difficulty</th>
+                        <th>Correct %</th>
+                        <th>Avg Time (sec)</th>
+                        <th>Timer Expired %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in easy_questions %}
+                    <tr>
+                        <td class="admin-question-text" title="{{ question.text }}">
+                            <a href="{{ url_for('admin.question_detail', question_id=question.id) }}">
+                                {{ question.text }}
+                            </a>
+                        </td>
+                        <td>{{ question.difficulty|capitalize }}</td>
+                        <td>{{ "%.1f"|format(question.correct_percentage) }}%</td>
+                        <td>{{ "%.1f"|format(question.avg_time) }}</td>
+                        <td>{{ "%.1f"|format(question.timer_expired_percentage) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Medium Questions Tab -->
+        <div id="medium" class="tabcontent" style="display: none;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th>Difficulty</th>
+                        <th>Correct %</th>
+                        <th>Avg Time (sec)</th>
+                        <th>Timer Expired %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in medium_questions %}
+                    <tr>
+                        <td class="admin-question-text" title="{{ question.text }}">
+                            <a href="{{ url_for('admin.question_detail', question_id=question.id) }}">
+                                {{ question.text }}
+                            </a>
+                        </td>
+                        <td>{{ question.difficulty|capitalize }}</td>
+                        <td>{{ "%.1f"|format(question.correct_percentage) }}%</td>
+                        <td>{{ "%.1f"|format(question.avg_time) }}</td>
+                        <td>{{ "%.1f"|format(question.timer_expired_percentage) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Hard Questions Tab -->
+        <div id="hard" class="tabcontent" style="display: none;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Question</th>
+                        <th>Difficulty</th>
+                        <th>Correct %</th>
+                        <th>Avg Time (sec)</th>
+                        <th>Timer Expired %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for question in hard_questions %}
+                    <tr>
+                        <td class="admin-question-text" title="{{ question.text }}">
+                            <a href="{{ url_for('admin.question_detail', question_id=question.id) }}">
+                                {{ question.text }}
+                            </a>
+                        </td>
+                        <td>{{ question.difficulty|capitalize }}</td>
+                        <td>{{ "%.1f"|format(question.correct_percentage) }}%</td>
+                        <td>{{ "%.1f"|format(question.avg_time) }}</td>
+                        <td>{{ "%.1f"|format(question.timer_expired_percentage) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="admin-card">
+        <h2>Recent Activity</h2>
+        
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Date</th>
+                    <th>Difficulty</th>
+                    <th>Score</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for session in recent_sessions %}
+                <tr>
+                    <td>{{ session.user.username }}</td>
+                    <td>{{ session.completed_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td class="difficulty-{{ session.difficulty }}">{{ session.difficulty|capitalize }}</td>
+                    <td>{{ session.score }}%</td>
+                    <td>{{ session.time_taken_formatted }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Prepare chart data
+        const allChartData = {
+            labels: {{ all_chart_data.labels|tojson }},
+            correctPercentages: {{ all_chart_data.correct_percentages|tojson }},
+            incorrectPercentages: {{ all_chart_data.incorrect_percentages|tojson }},
+            timerExpiredPercentages: {{ all_chart_data.timer_expired_percentages|tojson }}
+        };
+        
+        const easyChartData = {
+            labels: {{ easy_chart_data.labels|tojson }},
+            correctPercentages: {{ easy_chart_data.correct_percentages|tojson }},
+            incorrectPercentages: {{ easy_chart_data.incorrect_percentages|tojson }},
+            timerExpiredPercentages: {{ easy_chart_data.timer_expired_percentages|tojson }}
+        };
+        
+        const mediumChartData = {
+            labels: {{ medium_chart_data.labels|tojson }},
+            correctPercentages: {{ medium_chart_data.correct_percentages|tojson }},
+            incorrectPercentages: {{ medium_chart_data.incorrect_percentages|tojson }},
+            timerExpiredPercentages: {{ medium_chart_data.timer_expired_percentages|tojson }}
+        };
+        
+        const hardChartData = {
+            labels: {{ hard_chart_data.labels|tojson }},
+            correctPercentages: {{ hard_chart_data.correct_percentages|tojson }},
+            incorrectPercentages: {{ hard_chart_data.incorrect_percentages|tojson }},
+            timerExpiredPercentages: {{ hard_chart_data.timer_expired_percentages|tojson }}
+        };
+        
+        // Initialize chart with easy questions data
+        const ctx = document.getElementById('questionPerformanceChart').getContext('2d');
+        
+        // Chart configuration
+        const chartConfig = {
+            type: 'bar',
+            data: {
+                barPercentage: 0.9,
+                categoryPercentage: 0.9,
+                labels: easyChartData.labels,
+                datasets: [
+                    {
+                        label: 'Correct %',
+                        data: easyChartData.correctPercentages,
+                        backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        borderWidth: 1,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.8
+                    },
+                    {
+                        label: 'Incorrect %',
+                        data: easyChartData.incorrectPercentages,
+                        backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                        borderColor: 'rgba(220, 53, 69, 1)',
+                        borderWidth: 1,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.8
+                    },
+                    {
+                        label: 'Timer Expired %',
+                        data: easyChartData.timerExpiredPercentages,
+                        backgroundColor: 'rgba(108, 117, 125, 0.7)',  // Grey color
+                        borderColor: 'rgba(108, 117, 125, 1)',
+                        borderWidth: 1,
+                        barPercentage: 0.8,
+                        categoryPercentage: 0.8
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Percentage'
+                        },
+                        stacked: false
+                    },
+                    
+                    // Add barPercentage and categoryPercentage to make bars thicker
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Question ID'
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 90,
+                            minRotation: 45,
+                            font: {
+                                size: 9
+                            }
+                        }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const idx = tooltipItems[0].dataIndex;
+                                const qid = tooltipItems[0].label;
+                                return `Question ${qid}`;
+                            },
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toFixed(1) + '%';
+                                }
+                                return label;
+                            },
+                            afterLabel: function(context) {
+                                return 'Click to view question details';
+                            }
+                        }
+                    }
+                },
+                onClick: function(e, elements) {
+                    if (elements.length > 0) {
+                        const index = elements[0].index;
+                        const questionId = this.data.labels[index];
+                        window.location.href = `/admin/question/${questionId}`;
+                    }
+                }
+            }
+        };
+        
+        const questionPerformanceChart = new Chart(ctx, chartConfig);
+        
+        // Store the chart instance globally to update it later
+        window.questionPerformanceChart = questionPerformanceChart;
+    });
+    
+    // Function to switch between difficulty tabs and update the chart
+    function openDifficultyTab(evt, tabId, chartDifficulty) {
+        // Hide all tabcontent elements
+        let tabcontent = document.getElementsByClassName("tabcontent");
+        for (let i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        
+        // Remove active class from all tablinks
+        let tablinks = document.getElementsByClassName("tablink");
+        for (let i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        
+        // Show the current tab and add active class to the button that opened it
+        document.getElementById(tabId).style.display = "block";
+        evt.currentTarget.className += " active";
+        
+        // Update the chart data based on the selected difficulty
+        updateChartData(chartDifficulty);
+    }
+    
+    // Function to update chart data based on selected difficulty
+    function updateChartData(difficulty) {
+        const chart = window.questionPerformanceChart;
+        if (!chart) return;
+        
+        // Prepare chart data
+        const allChartData = {
+            labels: {{ all_chart_data.labels|tojson }},
+            correctPercentages: {{ all_chart_data.correct_percentages|tojson }},
+            incorrectPercentages: {{ all_chart_data.incorrect_percentages|tojson }},
+            timerExpiredPercentages: {{ all_chart_data.timer_expired_percentages|tojson }}
+        };
+        
+        const easyChartData = {
+            labels: {{ easy_chart_data.labels|tojson }},
+            correctPercentages: {{ easy_chart_data.correct_percentages|tojson }},
+            incorrectPercentages: {{ easy_chart_data.incorrect_percentages|tojson }},
+            timerExpiredPercentages: {{ easy_chart_data.timer_expired_percentages|tojson }}
+        };
+        
+        const mediumChartData = {
+            labels: {{ medium_chart_data.labels|tojson }},
+            correctPercentages: {{ medium_chart_data.correct_percentages|tojson }},
+            incorrectPercentages: {{ medium_chart_data.incorrect_percentages|tojson }},
+            timerExpiredPercentages: {{ medium_chart_data.timer_expired_percentages|tojson }}
+        };
+        
+        const hardChartData = {
+            labels: {{ hard_chart_data.labels|tojson }},
+            correctPercentages: {{ hard_chart_data.correct_percentages|tojson }},
+            incorrectPercentages: {{ hard_chart_data.incorrect_percentages|tojson }},
+            timerExpiredPercentages: {{ hard_chart_data.timer_expired_percentages|tojson }}
+        };
+        
+        // Select the appropriate data based on difficulty
+        let selectedData;
+        switch (difficulty) {
+            case 'easy':
+                selectedData = easyChartData;
+                break;
+            case 'medium':
+                selectedData = mediumChartData;
+                break;
+            case 'hard':
+                selectedData = hardChartData;
+                break;
+            default:
+                selectedData = allChartData;
+        }
+        
+        // Update chart data
+        chart.data.labels = selectedData.labels;
+        chart.data.datasets[0].data = selectedData.correctPercentages;
+        chart.data.datasets[1].data = selectedData.incorrectPercentages;
+        chart.data.datasets[2].data = selectedData.timerExpiredPercentages;
+        
+        // Update chart container height based on number of questions
+        const chartContainer = document.querySelector('.admin-chart-container');
+        const numQuestions = selectedData.labels.length;
+        
+        // Set minimum height and adjust for the number of questions
+        if (numQuestions > 50) {
+            chartContainer.style.height = '700px';
+        } else if (numQuestions > 30) {
+            chartContainer.style.height = '500px';
+        } else {
+            chartContainer.style.height = '400px';
+        }
+        
+        // Ensure all labels are displayed
+        chart.options.scales.x.ticks.autoSkip = false;
+        
+        // Update the chart
+        chart.update();
+    }
+</script>
+{% endblock %}
